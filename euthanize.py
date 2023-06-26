@@ -33,7 +33,11 @@ oldest_weekly = today - timedelta(weeks=args.weeks)
 oldest_monthly = today - relativedelta(months=args.months)
 oldest_yearly = today - relativedelta(years=args.months)
 
-console.print(today, oldest_daily, oldest_weekly, oldest_monthly, oldest_yearly)
+console.print(f"Today is {today}")
+console.print(f"Keeping daily files after {oldest_daily}")
+console.print(f"Keeping weekly files after {oldest_weekly}")
+console.print(f"Keeping monthly files after {oldest_monthly}")
+console.print(f"Keeping yearly files after {oldest_yearly}")
 
 to_delete = []
 
@@ -42,19 +46,23 @@ with console.status("Euthanizing backups...", spinner="dots12"):
         modifield_date  = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc).date()
 
         if modifield_date >= oldest_daily:
-            console.print(f'Keeping daily file {f.name} from {modifield_date}')
+            console.print(f'Keeping daily file "{f}" from {modifield_date}')
             continue
     
         if modifield_date >= oldest_weekly and modifield_date.weekday() == 0:
-            console.print(f'Keeping weekly file {f.name} from {modifield_date} with day of week of {modifield_date.weekday()}')
+            console.print(f'Keeping weekly file "{f}" from {modifield_date} with day of week of {modifield_date.weekday()}')
             continue
 
         if modifield_date >= oldest_monthly and modifield_date.day == 1:
-            console.print(f'Keeping monthly file {f.name} from {modifield_date} with month day of {modifield_date.day}')
+            console.print(f'Keeping monthly file "{f}" from {modifield_date} with month day of {modifield_date.day}')
             continue
 
         if modifield_date >= oldest_yearly and modifield_date.day == 1 and modifield_date.month == 1:
-            console.print(f'Keeping yearly file {f.name} from {modifield_date} with month of {modifield_date.month} and day of {modifield_date.day}')
+            console.print(f'Keeping yearly file "{f}" from {modifield_date} with month of {modifield_date.month} and day of {modifield_date.day}')
             continue
 
         to_delete.append(f)
+
+for f in to_delete:
+    console.print(f"Deleting file: {f}")
+    f.unlink()
